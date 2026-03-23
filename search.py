@@ -43,7 +43,7 @@ def read_file(filename):
 
 
 # TEST
-graph, start, goals = read_file("PathFinder-test-1.txt")
+graph, start, goals = read_file("PathFinder-test.txt")
 
 print("Graph:", graph)
 print("Start:", start)
