@@ -1,7 +1,10 @@
 import sys
+import heapq
+import math
 
 def read_file(filename):
     graph = {}
+    coordinates = {}
     start = None
     goals = []
 
@@ -13,7 +16,10 @@ def read_file(filename):
     for line in lines:
         line = line.strip()
 
-        if line == "Edges:":
+        if line == "Nodes:":
+            section = "nodes"
+            continue
+        elif line == "Edges:":
             section = "edges"
             continue
         elif line == "Origin:":
@@ -23,10 +29,14 @@ def read_file(filename):
             section = "goals"
             continue
 
-        if section == "edges" and line:
+        if section == "nodes" and line:
+            node_id, coords = line.split(":")
+            x, y = map(int, coords.strip("() ").split(","))
+            coordinates[int(node_id)] = (x, y)
+
+        elif section == "edges" and line:
             edge, cost = line.split(":")
-            a, b = edge.strip()[1:-1].split(",")
-            a, b = int(a), int(b)
+            a, b = map(int, edge.strip("() ").split(","))
             cost = int(cost)
 
             if a not in graph:
@@ -39,39 +49,46 @@ def read_file(filename):
         elif section == "goals" and line:
             goals = list(map(int, line.split(";")))
 
-    return graph, start, goals
+    return graph, coordinates, start, goals
 
-def get_heuristic(node, goals):
-    return min(abs(node - goal) for goal in goals)
+def calculate_heuristic(node, goals, coordinates):
+    x1, y1 = coordinates[node]
+    return min(math.sqrt((x1 - coordinates[goal][0])**2 + (y1 - coordinates[goal][1])**2) for goal in goals)
 
-def greedy_bfs(graph, start, goals):
-    visited = set()
-    queue = [(start, [start])]
+def greedy_bfs(graph, coordinates, start, goals):
+    frontier = []
+    heapq.heappush(frontier, (0, start, 0, [start]))  # (heuristic, node_id, creation_order, path)
+    node_counter = 0
+    num_nodes_created = 0
 
-    while queue:
-        current_node, path = queue.pop(0)
+    while frontier:
+        _, current_node, _, path = heapq.heappop(frontier)
 
         if current_node in goals:
-            return path
+            return path, num_nodes_created
 
-        if current_node not in visited:
-            visited.add(current_node)
+        neighbors = graph.get(current_node, [])
+        for neighbor, _ in neighbors:
+            heuristic = calculate_heuristic(neighbor, goals, coordinates)
+            node_counter += 1
+            heapq.heappush(frontier, (heuristic, neighbor, node_counter, path + [neighbor]))
+            num_nodes_created += 1
 
-            neighbors = graph.get(current_node, [])
-            neighbors.sort(key=lambda x: get_heuristic(x[0], goals))
-
-            for neighbor, _ in neighbors:
-                if neighbor not in visited:
-                    queue.append((neighbor, path + [neighbor]))
-
-    return None
+    return None, num_nodes_created
 
 if __name__ == "__main__":
-    filename = "PathFinder-test.txt"
-    graph, start, goals = read_file(filename)
-    result = greedy_bfs(graph, start, goals)
+    if len(sys.argv) != 2:
+        print("Usage: python search.py <filename>")
+        sys.exit(1)
+
+    filename = sys.argv[1]
+    method = "GreedyBFS"
+
+
+    graph, coordinates, start, goals = read_file(filename)
+    result, num_nodes_created = greedy_bfs(graph, coordinates, start, goals)
 
     if result:
-        print(filename,"Greedy Best First Search", " -> ".join(map(str, result)))
+        print(f"{filename} {method} {result[-1]} {num_nodes_created} {' -> '.join(map(str, result))}")
     else:
         print("No path found.")
