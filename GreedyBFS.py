@@ -77,9 +77,6 @@ def greedy_bfs(graph, coordinates, start, goals):
     return None, num_nodes_created
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python search.py <filename>")
-        sys.exit(1)
 
     filename = sys.argv[1]
     method = "GreedyBFS"
