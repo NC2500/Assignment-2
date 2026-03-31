@@ -42,6 +42,7 @@ def read_file(filename):
             if a not in graph:
                 graph[a] = []
             graph[a].append((b, cost))
+            
 
         elif section == "origin" and line:
             start = int(line)
@@ -50,10 +51,13 @@ def read_file(filename):
             goals = list(map(int, line.split(";")))
 
     return graph, coordinates, start, goals
+    
 
 def calculate_heuristic(node, goals, coordinates):
     x1, y1 = coordinates[node]
     return min(math.sqrt((x1 - coordinates[goal][0])**2 + (y1 - coordinates[goal][1])**2) for goal in goals)
+    ## This heuristic calculates the straight-line distance from the current node to the closest goal.
+    ## using pythagorean theorem to compute the distance between two points in a 2D space. The heuristic is admissible and consistent, making it suitable for A* search.
 
 def AStar(graph, coordinates, start, goals):
     frontier = []
