@@ -3,7 +3,7 @@ Search (Chapters 3-4)
 
 The way to use this code is to subclass Problem to create a class of problems,
 then create problem instances and solve them with calls to the various search
-functions.
+`functions.
 """
 
 import sys
@@ -11,6 +11,7 @@ from collections import deque
 from utils import *
 import numpy as np
 import random
+
 
 
 
