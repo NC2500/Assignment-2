@@ -1,125 +1,50 @@
 import sys
-
-def read_file(filename):
-    graph = {}
-    start = None
-    goals = []
-
-    with open(filename, 'r') as file:
-        lines = file.readlines()
-
-    section = None
-
-    for line in lines:
-        line = line.strip()
-
-        if line == "Edges:":
-            section = "edges"
-            continue
-        elif line == "Origin:":
-            section = "origin"
-            continue
-        elif line == "Destinations:":
-            section = "goals"
-            continue
-
-        if section == "edges" and line:
-            edge, cost = line.split(":")
-            a, b = edge.strip()[1:-1].split(",")
-            a, b = int(a), int(b)
-            cost = int(cost)
-
-            if a not in graph:
-                graph[a] = []
-            graph[a].append((b, cost))
-
-        elif section == "origin" and line:
-            start = int(line)
-
-        elif section == "goals" and line:
-            goals = list(map(int, line.split(";")))
-
-    return graph, start, goals
+from utils import read_file, format_output
+from DFS import DFS
+from BFS import BFS
+from GBFS import GBFS
+from AStar import AStar
+from CUS1 import CUS1
+from CUS2 import CUS2
 
 
-# TEST
-graph, start, goals = read_file("PathFinder-test.txt")
+METHODS = {
+    "DFS": DFS,
+    "BFS": BFS,
+    "GBFS": GBFS,
+    "AS": AStar,
+    "ASTAR": AStar,
+    "CUS1": CUS1,
+    "CUS2": CUS2,
+}
 
-print("Graph:", graph)
-print("Start:", start)
-print("Goals:", goals)
 
-#DFS & BFS
-from collections import deque
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python search.py <test_case> <method>")
+        print("  test_case: TC02, TC03, ... TC15, or PathFinder-test")
+        print("  method: DFS, BFS, GBFS, AS, CUS1, CUS2")
+        sys.exit(1)
 
-def read_graph(filename):
-    nodes, edges, origin, destinations = {}, {}, None, []
-    section = None
-    with open(filename, "r") as file:
-        for line in file:
-            line = line.strip()
-            if not line: continue
-            if "Nodes:" in line: section = "nodes"
-            elif "Edges:" in line: section = "edges"
-            elif "Origin:" in line: section = "origin"
-            elif "Destinations:" in line: section = "destinations"
-            elif section == "nodes":
-                parts = line.split(":")
-                nodes[int(parts[0])] = parts[1].strip()
-            elif section == "edges":
-                # Format: (a,b): cost -> only take (a,b)
-                edge_nodes = line.split(":")[0].strip("() ")
-                a, b = map(int, edge_nodes.split(","))
-                if a not in edges: edges[a] = []
-                edges[a].append(b)
-            elif section == "origin":
-                origin = int(line)
-            elif section == "destinations":
-                # Handle semicolon-separated destinations across lines
-                destinations.extend([int(d.strip()) for d in line.split(";") if d.strip()])
-    return edges, origin, set(destinations)
+    filename = sys.argv[1]
+    
+    if not filename.startswith("Test_Cases") and not filename.startswith("."):
+        if not filename.endswith(".txt"):
+            filename = f"Test_Cases/{filename}.txt"
+        else:
+            filename = f"Test_Cases/{filename}"
+    
+    method = sys.argv[2].upper()
 
-def dfs(graph, start, goals):
-    stack = [(start, [start])]
-    visited = set()
-    nodes_created = 0
-    while stack:
-        node, path = stack.pop()
-        nodes_created += 1
-        if node in goals: 
-            return node, nodes_created, path
-        if node not in visited:
-            visited.add(node)
-            # Sort reverse so that the smallest ID is popped first from the stack
-            for neighbor in sorted(graph.get(node, []), reverse=True):
-                if neighbor not in visited:
-                    stack.append((neighbor, path + [neighbor]))
-    return None, nodes_created, []
+    if method not in METHODS:
+        print("Invalid method. Use DFS, BFS, GBFS, AS/ASTAR, CUS1, or CUS2")
+        sys.exit(1)
 
-def bfs(graph, start, goals):
-    queue = deque([(start, [start])])
-    visited = {start}
-    nodes_created = 0
-    while queue:
-        node, path = queue.popleft()
-        nodes_created += 1
-        if node in goals: 
-            return node, nodes_created, path
-        # Sort ascending to visit smaller IDs first
-        for neighbor in sorted(graph.get(node, [])):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append((neighbor, path + [neighbor]))
-    return None, nodes_created, []
+    graph, coordinates, start, goals = read_file(filename)
 
-# --- Execution ---
-filename = "PathFinder-test.txt"
-graph, origin, goals = read_graph(filename)
+    if method in ["DFS", "BFS", "CUS1"]:
+        result = METHODS[method](graph, start, goals)
+    else:
+        result = METHODS[method](graph, coordinates, start, goals)
 
-# Run DFS
-goal_dfs, created_dfs, path_dfs = dfs(graph, origin, goals)
-print(f"DFS: Goal {goal_dfs}, Nodes Created {created_dfs}\nPath: {' '.join(map(str, path_dfs))}\n")
-
-# Run BFS
-goal_bfs, created_bfs, path_bfs = bfs(graph, origin, goals)
-print(f"BFS: Goal {goal_bfs}, Nodes Created {created_bfs}\nPath: {' '.join(map(str, path_bfs))}")
+    print(format_output(filename, method, result))
