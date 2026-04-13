@@ -42,7 +42,6 @@ def read_file(filename):
             if a not in graph:
                 graph[a] = []
             graph[a].append((b, cost))
-            
 
         elif section == "origin" and line:
             start = int(line)
@@ -51,15 +50,12 @@ def read_file(filename):
             goals = list(map(int, line.split(";")))
 
     return graph, coordinates, start, goals
-    
 
 def calculate_heuristic(node, goals, coordinates):
     x1, y1 = coordinates[node]
     return min(math.sqrt((x1 - coordinates[goal][0])**2 + (y1 - coordinates[goal][1])**2) for goal in goals)
-    ## This heuristic calculates the straight-line distance from the current node to the closest goal.
-    ## using pythagorean theorem to compute the distance between two points in a 2D space. The heuristic is admissible and consistent, making it suitable for A* search.
 
-def AStar(graph, coordinates, start, goals):
+def greedy_bfs(graph, coordinates, start, goals):
     frontier = []
     heapq.heappush(frontier, (0, start, 0, [start]))  # (heuristic, node_id, creation_order, path)
     node_counter = 0
@@ -81,15 +77,13 @@ def AStar(graph, coordinates, start, goals):
     return None, num_nodes_created
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit(1)
 
     filename = sys.argv[1]
-    method = "AStar"
+    method = "GreedyBFS"
 
 
     graph, coordinates, start, goals = read_file(filename)
-    result, num_nodes_created = AStar(graph, coordinates, start, goals)
+    result, num_nodes_created = greedy_bfs(graph, coordinates, start, goals)
 
     if result:
         print(f"{filename} {method} {result[-1]} {num_nodes_created} {' -> '.join(map(str, result))}")
