@@ -3,7 +3,6 @@ from utils import calculate_heuristic
 
 
 def CUS2(graph, coordinates, start, goals):
-    # informed search to find shortest path with least moves
     frontier = []
     creation_order = 0
     number_of_nodes = 1
