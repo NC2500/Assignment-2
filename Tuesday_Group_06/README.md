@@ -1,0 +1,62 @@
+# Path Finding Algorithms - Test Cases
+
+## Overview
+This project implements various path finding algorithms: DFS, BFS, GBFS, A*, CUS1, and CUS2.
+
+## Test Cases
+
+Test case files are located in the `Test_Cases/` folder:
+
+| File | Description |
+|------|-------------|
+| `TC02.txt` | Single Destination Simple Path |
+| `TC03.txt` | Multiple Destinations Available |
+| `TC04.txt` | Direct Edge to Goal |
+| `TC05.txt` | No Reachable Goal |
+| `TC06.txt` | Start Node Is Destination |
+| `TC07.txt` | Directed Edge Restriction |
+| `TC08.txt` | Tie-Break Smaller Node |
+| `TC09.txt` | Tie-Break Insertion Order |
+| `TC10.txt` | Deep Search DFS Case |
+| `TC11.txt` | Wide Search BFS Case |
+| `TC12.txt` | Cycle in Graph |
+| `TC13.txt` | Different Edge Costs |
+| `TC14.txt` | Equal Cost Alternative Paths |
+| `TC15.txt` | Large Graph Performance Case |
+| `PathFinder-test.txt` | Original test file |
+
+## Usage
+
+Run tests from the project root:
+
+```bash
+python search.py <test_case> <method>
+```
+
+### Arguments
+- `test_case`: TC02 to TC15, or PathFinder-test
+- `method`: DFS, BFS, GBFS, AS, CUS1, CUS2
+
+### Examples
+
+```bash
+python search.py TC02 BFS
+python search.py TC03 DFS
+python search.py TC10 GBFS
+python search.py TC15 AS
+python search.py PathFinder-test CUS1
+```
+
+### Output Format
+```
+<filename> <method>
+<goal_node> <nodes_created>
+<path>
+```
+
+For example:
+```
+TC02.txt BFS
+4 5
+1 -> 2 -> 3 -> 4
+```
